@@ -1,10 +1,14 @@
 // importing Express
 const express = require("express");
 
+// importing File System
 const fs = require("fs");
 
+// importing Mongoose
+const mongoose = require("mongoose");
+
 // importing data.json
-const users = require("./data.json");
+const { type } = require("os");
 
 // creating express app
 const app = express();
@@ -12,14 +16,60 @@ const app = express();
 // constant PORT
 const PORT = 3600;
 
-// Applying Middleware to save form data inside body. This line is a middleware that helps your Express app read form data sent using the HTML <form>.
+// connection
+mongoose
+  .connect("mongodb://127.0.0.1:27017/practice-db")
+  .then(() => {
+    console.log("Connected to MongoDB");
+  })
+  .catch((err) => {
+    console.error("Error connecting to MongoDB:", err);
+  });
+
+// Schema
+const userSchema = new mongoose.Schema(
+  {
+    first_name: {
+      type: String,
+      required: true,
+    },
+    last_name: {
+      type: String,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+    jobTitle: {
+      type: String,
+    },
+    gender: {
+      type: String,
+    },
+  },
+  { timestamps: true }
+);
+
+// Model
+const User = mongoose.model("user", userSchema);
+
+// Middleware
+app.use(express.json()); // ✅ Added for JSON support
 app.use(express.urlencoded({ extended: false }));
 
 // Routes
-app.get("/users", (req, res) => {
+app.get("/users", async (req, res) => {
+  const allUsers = await User.find({});
   const html = `
   <ul>
-      ${users.map((user) => `<li>${user.first_name}</li>`).join("")}
+      ${allUsers
+        .map((user) => `<li>${user.first_name} - ${user.email}</li>`)
+        .join("")}
   </ul>`;
   res.send(html);
 });
@@ -29,9 +79,6 @@ app.get("/api/users", (req, res) => {
   return res.json(users);
 });
 
-// Whenerever our route looks same we can so this things also
-// For Dynamic data with id
-
 app
   .route("/api/users/:id")
   .get((req, res) => {
@@ -40,22 +87,37 @@ app
     return res.json(user);
   })
   .patch((req, res) => {
-    //TODO: Edit the User with ID.
     return res.json({ status: "pending" });
   })
   .delete((req, res) => {
-    //TODO: Delete the user with ID.
     return res.json({ status: "pending" });
   });
 
-app.post("/api/users", (req, res) => {
-  const body = req.body;
-  users.push({ ...body, id: users.length + 1 });
-  fs.writeFile("./data.json", JSON.stringify(users), (err, data) => {
-    return res.json({ status: "pending", id: users.length });
-  });
-  // console.log("Body:", body);
-  //TODO: Create New User
+app.post("/api/users", async (req, res) => {
+  try {
+    const body = req.body;
+
+    if (!body || !body.first_name || !body.email || !body.password) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    const result = await User.create({
+      first_name: body.first_name,
+      last_name: body.last_name,
+      email: body.email,
+      password: body.password,
+      jobTitle: body.jobTitle,
+      gender: body.gender,
+    });
+
+    console.log("Result:", result);
+    return res.status(201).json({ status: "success", data: result });
+  } catch (err) {
+    console.error(err);
+    return res
+      .status(500)
+      .json({ error: "Server error", details: err.message });
+  }
 });
 
 app.listen(PORT, () => {
