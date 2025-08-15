@@ -1,0 +1,14 @@
+REST API- JSON
+
+GET/users - list of alll users
+
+GET /user/1 - Get the user with ID 1
+GET /user/2 - Get the user with ID 2
+
+POST /users - Create new user
+
+PATCH /users/1 - Exit the user with ID 1
+
+DELETE /users/1 - Delete the user with ID 1
+
+API : https://www.mockaroo.com/  // fort random user
