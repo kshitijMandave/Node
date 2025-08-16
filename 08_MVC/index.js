@@ -1,4 +1,4 @@
-// importing Express
+// importing All the required Packages/ Modules
 const express = require("express");
 const { connectDB } = require("./connection");
 
@@ -11,16 +11,23 @@ const app = express();
 // constant PORT
 const PORT = 3600;
 
-// connection
-connectDB("mongodb://127.0.0.1:27017/practice-db");
+// Step 1 : connection with MongoDB
+connectDB("mongodb://127.0.0.1:27017/practice-db")
+  .then(() => {
+    console.log("MongoDB Connectet Successfully!");
+  })
+  .catch((error) => {
+    console.error("Something Wrong while Connecting the MongoDB");
+  });
 
-// Middleware
-app.use(express.json()); // ✅ Added for JSON support
+// Step 2 : Middleware
 app.use(express.urlencoded({ extended: false }));
-app.use(logReqRes("log.txt"));
+app.use(logReqRes("log.txt")); // ✅ Added for logging requests and responses
 
-// Routes
-app.use("/users", userRouter);
+// Step 3 : Routes
+// Here we are using the userRouter which contains all the user related routes
+// means if any request comes to /api/users then it will be handled by userRouter
+app.use("/api/users", userRouter);
 
 app.listen(PORT, () => {
   console.log(`server started at PORT: ${PORT}`);

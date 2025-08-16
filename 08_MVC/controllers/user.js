@@ -1,3 +1,5 @@
+// here we hae created some functions which are using User model to interact with the database
+// Model where we craeetd the schema for user
 const User = require("../models/user");
 
 async function handleGetAllUsers(req, res) {
