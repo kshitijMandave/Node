@@ -14,8 +14,17 @@ async function handlegetUserById(req, res) {
 }
 
 async function handleUpdaeUserById(req, res) {
-  await User.findByIdAndUpdate(req.params.id, { lastName: Changed });
-  return res.json({ status: "Success" });
+  const updatedUser = await User.findByIdAndUpdate(
+    req.params.id,
+    req.body, // update with request body
+    { new: true } // return updated user
+  );
+
+  if (!updatedUser) {
+    return res.status(404).json({ error: "User not found" });
+  }
+
+  return res.json({ status: "Success", data: updatedUser });
 }
 
 async function handleDeleteUserById(req, res) {
@@ -23,7 +32,7 @@ async function handleDeleteUserById(req, res) {
   return res.json({ status: "Success" });
 }
 
-async function handleCreateNewUser(params) {
+async function handleCreateNewUser(req, res) {
   const body = req.body;
 
   if (

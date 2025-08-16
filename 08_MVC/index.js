@@ -27,7 +27,7 @@ app.use(logReqRes("log.txt")); // ✅ Added for logging requests and responses
 // Step 3 : Routes
 // Here we are using the userRouter which contains all the user related routes
 // means if any request comes to /api/users then it will be handled by userRouter
-app.use("/api/users", userRouter);
+app.use("/api/users", userRouter); // whenever any request comes to /api/users, it will be handled by userRouter
 
 app.listen(PORT, () => {
   console.log(`server started at PORT: ${PORT}`);
